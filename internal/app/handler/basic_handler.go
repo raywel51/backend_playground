@@ -15,6 +15,10 @@ func WelcomeHandler(c *gin.Context) {
 	c.String(http.StatusOK, "Hello from Gin!")
 }
 
+func PingHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": true})
+}
+
 func IndexView(c *gin.Context) {
 	osName := runtime.GOOS
 	ginVersion := gin.Version

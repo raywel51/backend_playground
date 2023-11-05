@@ -20,11 +20,12 @@ func SetupRouter() *gin.Engine {
 	})
 
 	r.GET("/", handler.IndexView)
+	r.GET("/ping", handler.PingHandler)
 
 	apiGroup := r.Group("/api")
 	apiGroup.Use(middleware.LoggerMiddleware())
 	apiGroup.GET("/", handler.WelcomeHandler)
-	apiGroup.GET("/hello", handler.HelloHandler)
+	apiGroup.GET("/ping", handler.PingHandler)
 
 	booksGroup := r.Group("/books")
 	booksGroup.Use(middleware.LoggerMiddleware())

@@ -1,3 +1,28 @@
+##############
+#  Original  #
+##############
+
+# directory structure
+bin/*
+pkg/*
+!.gitkeep
+
+# goop - go package manager
+.vendor
+
+
+
+#############################
+#  $ gibo Go JetBrains OSX  #
+#############################
+
+### https://raw.github.com/github/gitignore/5a339cce0d8ccac36e71b077ef39a55c682d6d91/Go.gitignore
+
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+
 # Folders
 _obj
 _test
