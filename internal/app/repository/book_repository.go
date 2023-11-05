@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
+	"os"
 	"playground/infrastructure/persistence"
 	"playground/internal/app/model"
 )
@@ -34,7 +35,7 @@ func InsertBooks(book *model.Book) error {
 	}
 	defer client.Disconnect(context.Background())
 
-	collection := client.Database("play_ground_go").Collection("books")
+	collection := client.Database(os.Getenv("DB_DATABASE")).Collection("books")
 
 	_, err = collection.InsertOne(context.Background(), book)
 	if err != nil {
