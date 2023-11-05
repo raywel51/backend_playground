@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .title }}</title>
+    <!-- Include Tailwind CSS from a CDN (you can also use a local installation) -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.15/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+<div class="text-center p-10">
+    <h1 class="text-4xl font-bold text-indigo-600">Welcome to GIN Framework!</h1>
+    <hr class="my-6">
+</div>
+<div class="text-center mt-4">
+    <a href="https://gin-gonic.com" class="text-lg text-blue-500">GIN Framework/{{ .ginVersion }} (on {{ .os }})</a>
+</div>
+
+<!-- Include Lottie Web Player script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.1/lottie.min.js"></script>
+
+<script>
+    // Path to your Lottie JSON animation file
+    const rootPath = window.location.origin;
+    const animationPath = `${rootPath}/assets/animation/loading.json`;
+
+    // Get a reference to the container element
+    const animationContainer = document.getElementById('lottie-animation');
+
+    // Configure the Lottie animation
+    const animation = lottie.loadAnimation({
+        container: animationContainer,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: animationPath,
+    });
+</script>
+</body>
+</html>
