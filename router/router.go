@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"net/http"
+
 	"playground/infrastructure/persistence"
 	"playground/internal/app/handler"
 	"playground/internal/app/model"
@@ -19,13 +20,13 @@ func SetupRouter() *gin.Engine {
 		c.File("./assets/ico/favicon.ico")
 	})
 
-	r.GET("/", handler.IndexView)
+	r.GET("/", handler.WelcomeHandler)
 	r.GET("/ping", handler.PingHandler)
 
-	apiGroup := r.Group("/api")
-	apiGroup.Use(middleware.LoggerMiddleware())
-	apiGroup.GET("/", handler.WelcomeHandler)
-	apiGroup.GET("/ping", handler.PingHandler)
+	credentialGroup := r.Group("/user")
+	credentialGroup.Use(middleware.LoggerMiddleware())
+	credentialGroup.POST("/login", handler.UserLogin)
+	credentialGroup.POST("/register", handler.UserRegister)
 
 	booksGroup := r.Group("/books")
 	booksGroup.Use(middleware.LoggerMiddleware())
