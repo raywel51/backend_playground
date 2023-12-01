@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -38,20 +37,12 @@ func UserLogin(c *gin.Context) {
 		return
 	}
 
-	// Here you should verify the password against the hashed password in your User model
-	// For example:
-	if !verifyPassword(req.Password, user.Password) {
+	if !helper.VerifyPassword(req.Password, user.Password) {
 		c.JSON(http.StatusUnauthorized, gin.H{"status": false, "message": "Invalid password"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": true})
-}
-
-func verifyPassword(inputPassword, storedPassword string) bool {
-	key := helper.GetHashing(inputPassword)
-	fmt.Println(key)
-	return key == storedPassword
 }
 
 func UserRegister(c *gin.Context) {
@@ -89,7 +80,7 @@ func UserRegister(c *gin.Context) {
 	hashedString := helper.GetHashing(req.Password) // get password with sha256 algorithm
 
 	// Create a user object
-	user := model.User{
+	user := model.UserDao{
 		ID:       primitive.NewObjectID(),
 		Username: req.Username,
 		Password: hashedString,
@@ -102,5 +93,39 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully", "user": user})
+	c.JSON(http.StatusCreated, gin.H{"message": "UserDao registered successfully", "user": user})
+}
+
+func UserReadAll(c *gin.Context) {
+	users, err := repository.GetAllUsers()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": false, "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"status": true, "count": len(users), "data": users})
+}
+
+func UserReadOneById(c *gin.Context) {
+	id := c.Param("id")
+
+	users, err := repository.GetUserByID(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": false, "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"status": true, "data": users})
+}
+
+func UserDeleteById(c *gin.Context) {
+	id := c.Param("id")
+
+	err := repository.DeleteUserById(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": false, "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"status": true})
 }
