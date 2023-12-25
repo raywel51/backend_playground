@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/nfnt/resize"
@@ -20,13 +21,13 @@ import (
 func ReadQrCodeHandler(c *gin.Context) {
 	url := c.Param("key")
 
-	qrCode, err := qrcode.New(url, qrcode.Medium)
+	qrCode, err := qrcode.New("https://www.raywel.ddns.net/api-go/"+url, qrcode.Medium)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate QR code"})
 		return
 	}
 
-	qrImg, err := qrCode.PNG(420)
+	qrImg, err := qrCode.PNG(500)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate QR code image"})
 		return
@@ -66,6 +67,7 @@ func ReadQrCodeHandler(c *gin.Context) {
 		return
 	}
 
+	fmt.Printf("gennarate qrcode -> : %s\n", url)
 	c.Header("Content-Type", "image/png")
 	c.Data(http.StatusOK, "image/png", buf.Bytes())
 }
@@ -121,7 +123,7 @@ func addLogoToQRCode(qrCode, logo image.Image) image.Image {
 	// Draw the logo onto the new image
 	draw.Draw(qrWithLogo, logo.Bounds().Add(logoPosition), logo, image.Point{}, draw.Over)
 
-	cropPx := 55
+	cropPx := 45
 	bounds := qrWithLogo.Bounds()
 	rgba := image.NewRGBA(image.Rect(0, 0, bounds.Dx(), bounds.Dy()))
 	draw.Draw(rgba, bounds, qrWithLogo, bounds.Min, draw.Src)

@@ -11,6 +11,8 @@ func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	r.LoadHTMLGlob("templates/*")
 
+	r.Static("/assets", "./assets")
+
 	r.GET("/favicon.ico", func(c *gin.Context) {
 		c.File("./assets/ico/favicon.ico")
 	})
@@ -27,7 +29,6 @@ func SetupRouter() *gin.Engine {
 	credentialGroup.DELETE("/:id", handler.UserDeleteById)
 
 	genQrGroup := r.Group("v2/gen-qr")
-	genQrGroup.Use(middleware.LoggerMiddleware())
 	genQrGroup.GET("/:key", handler.ReadQrCodeHandler)
 	genQrGroup.POST("", handler.CreateQrCode)
 
