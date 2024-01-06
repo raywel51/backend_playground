@@ -42,7 +42,11 @@ func UserLogin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": true})
+	c.JSON(http.StatusOK, gin.H{
+		"status":  true,
+		"message": "",
+		"token":   helper.GetToken(),
+	})
 }
 
 func UserRegister(c *gin.Context) {
