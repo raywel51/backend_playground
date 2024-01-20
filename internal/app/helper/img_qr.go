@@ -4,14 +4,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 
-	"playground/internal/app/model"
+	"playground/internal/app/model/entity"
 	"playground/internal/app/repository"
 )
 
 func CreateQr(raw, logo string) string {
 
 	priId := primitive.NewObjectID()
-	qr := model.QrImgDao{
+	qr := entity.QrImgDao{
 		ID:         priId,
 		RawData:    raw,
 		Logo:       logo,

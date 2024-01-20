@@ -1,4 +1,4 @@
-package model
+package entity
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,7 +11,7 @@ type GenQrDao struct {
 	IdentityType  int                `bson:"identity_type"`
 	RealName      string             `bson:"real_name"`
 	FamilyName    string             `bson:"family_name"`
-	Channel       string             `bson:"channel"`
+	Channel       int                `bson:"channel"`
 	RoomNumber    string             `bson:"room_number"`
 	VisitorType   int                `bson:"visitor_type"`
 	ProjectCode   string             `bson:"project_code"`
@@ -21,6 +21,7 @@ type GenQrDao struct {
 	RegisterTime  time.Time          `bson:"register_time"`
 	CheckoutTime  *time.Time         `bson:"check_out_time"`
 	PaymentStatus bool               `bson:"payment_status"`
+	Approve       bool               `bson:"approve"`
 	PinCode       string             `bson:"pin_code"`
 	QrKey         string             `bson:"qr_key"`
 }

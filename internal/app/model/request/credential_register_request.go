@@ -1,4 +1,4 @@
-package model
+package request
 
 type CredentialRegisterRequest struct {
 	Username string `form:"username" json:"username" bson:"username"`

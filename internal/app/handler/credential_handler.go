@@ -5,14 +5,17 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
+	"time"
 
 	"playground/internal/app/helper"
-	"playground/internal/app/model"
+	credential_helper "playground/internal/app/helper/credential-helper"
+	"playground/internal/app/model/entity"
+	"playground/internal/app/model/request"
 	"playground/internal/app/repository"
 )
 
 func UserLogin(c *gin.Context) {
-	var req model.CredentialLoginRequest
+	var req request.CredentialLoginRequest
 
 	if c.ContentType() == "application/x-www-form-urlencoded" {
 		if err := c.ShouldBindWith(&req, binding.Form); err != nil {
@@ -42,15 +45,36 @@ func UserLogin(c *gin.Context) {
 		return
 	}
 
+	accessToken, err := credential_helper.CreateToken(req, credential_helper.SecretKey, time.Minute*15)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating access token"})
+		return
+	}
+
+	expiryTime := time.Now().Add(12 * time.Hour)
+
+	token := entity.TokenDao{
+		ID:       primitive.NewObjectID(),
+		Token:    accessToken,
+		Expiry:   &expiryTime,
+		Username: req.Username,
+	}
+
+	err = repository.InsertOrUpdateToken(&token)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": false, "message": "Invalid credentials"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":  true,
-		"message": "",
-		"token":   helper.GetToken(),
+		"message": "Login successful",
+		"token":   accessToken,
 	})
 }
 
 func UserRegister(c *gin.Context) {
-	var req model.CredentialRegisterRequest
+	var req request.CredentialRegisterRequest
 
 	if c.ContentType() == "application/x-www-form-urlencoded" {
 		if err := c.ShouldBindWith(&req, binding.Form); err != nil {
@@ -83,8 +107,7 @@ func UserRegister(c *gin.Context) {
 
 	hashedString := helper.GetHashing(req.Password) // get password with sha256 algorithm
 
-	// Create a user object
-	user := model.UserDao{
+	user := entity.UserDao{
 		ID:       primitive.NewObjectID(),
 		Username: req.Username,
 		Password: hashedString,

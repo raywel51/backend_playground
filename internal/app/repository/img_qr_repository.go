@@ -7,10 +7,10 @@ import (
 	"os"
 
 	"playground/infrastructure/persistence"
-	"playground/internal/app/model"
+	"playground/internal/app/model/entity"
 )
 
-func InsertImageQr(qrImg model.QrImgDao) error {
+func InsertImageQr(qrImg entity.QrImgDao) error {
 	client, err := persistence.ConnectToMongoDB()
 	if err != nil {
 		return err

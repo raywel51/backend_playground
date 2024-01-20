@@ -3,10 +3,6 @@ package handler
 import (
 	"bytes"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/nfnt/resize"
-	"github.com/skip2/go-qrcode"
 	"image"
 	"image/draw"
 	"image/png"
@@ -14,8 +10,13 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/nfnt/resize"
+	"github.com/skip2/go-qrcode"
+
 	"playground/internal/app/helper"
-	"playground/internal/app/model"
+	"playground/internal/app/model/request"
 )
 
 func ReadQrCodeHandler(c *gin.Context) {
@@ -73,7 +74,7 @@ func ReadQrCodeHandler(c *gin.Context) {
 }
 
 func CreateQrCode(c *gin.Context) {
-	var req model.QrImgRequest
+	var req request.QrImgRequest
 
 	if c.ContentType() == "application/x-www-form-urlencoded" {
 		if err := c.ShouldBindWith(&req, binding.Form); err != nil {

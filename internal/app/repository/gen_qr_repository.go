@@ -10,10 +10,10 @@ import (
 	"os"
 
 	"playground/infrastructure/persistence"
-	"playground/internal/app/model"
+	"playground/internal/app/model/entity"
 )
 
-func RegisterQrCode(genQrCodeDao *model.GenQrDao) error {
+func InsertOneQrCode(genQrCodeDao *entity.GenQrDao) error {
 	client, err := persistence.ConnectToMongoDB()
 	if err != nil {
 		return err
@@ -36,7 +36,49 @@ func RegisterQrCode(genQrCodeDao *model.GenQrDao) error {
 	return nil
 }
 
-func CheckPin(pinCode string) (*model.GenQrDao, error) {
+func FindHistoryQrCode() ([]*entity.GenQrDao, error) {
+	client, err := persistence.ConnectToMongoDB()
+	if err != nil {
+		return nil, err
+	}
+	defer func(client *mongo.Client, ctx context.Context) {
+		err := client.Disconnect(ctx)
+		if err != nil {
+			log.Println("Error disconnecting from MongoDB:", err)
+		}
+	}(client, context.Background())
+
+	collection := client.Database(os.Getenv("DB_DATABASE")).Collection("qr_code")
+
+	// Find all documents in the collection
+	cursor, err := collection.Find(context.Background(), bson.M{})
+	if err != nil {
+		log.Println("Error finding documents:", err)
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	// Decode the results into a slice of GenQrDao
+	var result []*entity.GenQrDao
+	for cursor.Next(context.Background()) {
+		var document entity.GenQrDao
+		err := cursor.Decode(&document)
+		if err != nil {
+			log.Println("Error decoding document:", err)
+			return nil, err
+		}
+		result = append(result, &document)
+	}
+
+	if err := cursor.Err(); err != nil {
+		log.Println("Error iterating through cursor:", err)
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func CheckPin(pinCode string) (*entity.GenQrDao, error) {
 	client, err := persistence.ConnectToMongoDB()
 	if err != nil {
 		return nil, err
@@ -50,7 +92,7 @@ func CheckPin(pinCode string) (*model.GenQrDao, error) {
 
 	collection := client.Database(os.Getenv("DB_DATABASE")).Collection("users")
 
-	var qrCode model.GenQrDao
+	var qrCode entity.GenQrDao
 	filter := bson.M{"qr_key": pinCode}
 
 	err = collection.FindOne(context.Background(), filter).Decode(&qrCode)

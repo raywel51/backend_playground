@@ -12,7 +12,7 @@ import (
 	"playground/internal/app/model/entity"
 )
 
-func GetVisitorInfo(visitorId int) (*entity.VisitorTypeDao, error) {
+func GetCarTypeInfo(carType int) (*entity.CarTypeDao, error) {
 	client, err := persistence.ConnectToMongoDB()
 	if err != nil {
 		return nil, err
@@ -24,12 +24,12 @@ func GetVisitorInfo(visitorId int) (*entity.VisitorTypeDao, error) {
 		}
 	}(client, context.Background())
 
-	collection := client.Database(os.Getenv("DB_DATABASE")).Collection("visitor_type")
+	collection := client.Database(os.Getenv("DB_DATABASE")).Collection("car_type")
 
-	var visitorTypeDao entity.VisitorTypeDao
-	filter := bson.M{"visitor_type": visitorId}
+	var carTypeDao entity.CarTypeDao
+	filter := bson.M{"car_type": carType}
 
-	err = collection.FindOne(context.Background(), filter).Decode(&visitorTypeDao)
+	err = collection.FindOne(context.Background(), filter).Decode(&carTypeDao)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, fmt.Errorf("visitor Type Not Found: %w", err)
@@ -37,5 +37,5 @@ func GetVisitorInfo(visitorId int) (*entity.VisitorTypeDao, error) {
 		return nil, fmt.Errorf("error fetching user: %w", err)
 	}
 
-	return &visitorTypeDao, nil
+	return &carTypeDao, nil
 }

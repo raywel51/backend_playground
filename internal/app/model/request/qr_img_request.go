@@ -1,4 +1,4 @@
-package model
+package request
 
 type QrImgRequest struct {
 	RawData string `form:"raw_data" json:"raw_data" bson:"raw_data"`
