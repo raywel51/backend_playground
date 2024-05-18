@@ -22,7 +22,7 @@ func SetupRouter() *gin.Engine {
 	r.GET("/ping", handler.PingHandler)
 
 	credentialGroup := r.Group("v2/user")
-	credentialGroup.Use(middleware.LoggerMiddleware())
+	//credentialGroup.Use(middleware.LoggerMiddleware())
 	credentialGroup.POST("/login", handler.UserLogin)
 	credentialGroup.POST("/register", handler.UserRegister)
 	credentialGroup.GET("", handler.UserReadAll)
