@@ -30,6 +30,5 @@ func ConnectToMongoDB() (*mongo.Client, error) {
 		return nil, err
 	}
 
-	fmt.Println("Connected to MongoDB")
 	return client, nil
 }

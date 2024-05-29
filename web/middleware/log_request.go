@@ -29,7 +29,7 @@ func LoggerMiddleware() gin.HandlerFunc {
 		requestBody := c.Request.PostForm
 		responseBody := responseBuffer.String()
 
-		logEntry := fmt.Sprintf("[GIN] %s | %3d | %s | %s | %s %s", end.Format("2006/01/02 - 15:04:05"), status, latency, clientIP, method, path)
+		logEntry := fmt.Sprintf("[GIN] %s | %3d | %s | %s | %s %s | %s", end.Format("2006/01/02 - 15:04:05"), status, latency, clientIP, method, path, c.ContentType())
 		if len(requestParams) > 0 {
 			logEntry += fmt.Sprintf("\n"+" | Params: %v", requestParams)
 		}

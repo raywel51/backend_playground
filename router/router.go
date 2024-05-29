@@ -1,121 +1,72 @@
 package router
 
 import (
-	"context"
+	"time"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
-	"net/http"
-	"playground/infrastructure/persistence"
+
 	"playground/internal/app/handler"
-	"playground/internal/app/model"
+	register_access "playground/internal/app/handler/register-access"
 	"playground/web/middleware"
 )
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+
+	config := cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}
+
+	r.Use(cors.New(config))
+
 	r.LoadHTMLGlob("templates/*")
+
+	r.Static("/assets", "./assets")
 
 	r.GET("/favicon.ico", func(c *gin.Context) {
 		c.File("./assets/ico/favicon.ico")
 	})
 
-	r.GET("/", handler.IndexView)
-
-	apiGroup := r.Group("/api")
+	apiGroup := r.Group("api/v1")
 	apiGroup.Use(middleware.LoggerMiddleware())
+
 	apiGroup.GET("/", handler.WelcomeHandler)
-	apiGroup.GET("/hello", handler.HelloHandler)
+	apiGroup.GET("/ping", handler.PingHandler)
+	apiGroup.Any("/status/:code_number", handler.GetStatus)
 
-	booksGroup := r.Group("/books")
-	booksGroup.Use(middleware.LoggerMiddleware())
+	credentialGroup := apiGroup.Group("user")
+	credentialGroup.POST("/login", handler.UserLogin)
+	credentialGroup.POST("/register", handler.UserRegister)
+	credentialGroup.GET("", handler.UserReadAll)
+	credentialGroup.GET("/:id", handler.UserReadOneById)
+	credentialGroup.DELETE("/:id", handler.UserDeleteById)
 
-	booksGroup.POST("/", handler.CreateBooksHandler)
-	booksGroup.GET("/", handler.CreateBooksHandler)
+	genQrGroup := apiGroup.Group("gen-qr")
+	genQrGroup.GET("/:key", handler.ReadQrCodeHandler)
+	genQrGroup.POST("", handler.CreateQrCode)
 
-	// Get a single book by ID
-	booksGroup.GET("/:id", func(c *gin.Context) {
-		// Extract the book ID from the URL parameter
-		bookID := c.Param("id")
+	regQrGroup := apiGroup.Group("reg-qr")
+	regQrGroup.POST("/", register_access.GenQr)
+	regQrGroup.GET("/history", register_access.GetQrCode)
+	regQrGroup.GET("/history-one/:key", register_access.GetQrCode)
+	regQrGroup.GET("/history-between/:pages/:length", register_access.GetQrCode)
 
-		client, err := persistence.ConnectToMongoDB()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to MongoDB"})
-			return
-		}
-		defer client.Disconnect(context.Background())
+	parkingCal := apiGroup.Group("payment-parking")
+	parkingCal.GET("/calculator-fee", register_access.GetQrCode)
+	parkingCal.GET("/payment-fee", register_access.GetQrCode)
 
-		collection := client.Database("play_ground_go").Collection("books")
+	token := r.Group("token")
+	token.POST("/refresh", handler.RefreshHandler)
 
-		var book model.Book // Replace YourBookType with the actual type
-
-		// Query the book by its ID
-		filter := bson.M{"_id": bookID}
-		err = collection.FindOne(context.Background(), filter).Decode(&book)
-		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
-			return
-		}
-
-		c.JSON(http.StatusOK, book)
-	})
-
-	// Update a book by ID
-	booksGroup.PUT("/:id", func(c *gin.Context) {
-		// Extract the book ID from the URL parameter
-		bookID := c.Param("id")
-
-		// Parse the request body into a Book struct
-		var updatedBook model.Book // Replace YourBookType with the actual type
-		if err := c.ShouldBindJSON(&updatedBook); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		client, err := persistence.ConnectToMongoDB()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to MongoDB"})
-			return
-		}
-		defer client.Disconnect(context.Background())
-
-		collection := client.Database("play_ground_go").Collection("books")
-
-		// Update the book by its ID
-		filter := bson.M{"_id": bookID}
-		update := bson.M{"$set": updatedBook}
-		_, err = collection.UpdateOne(context.Background(), filter, update)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update book"})
-			return
-		}
-
-		c.JSON(http.StatusOK, updatedBook)
-	})
-
-	// Delete a book by ID
-	booksGroup.DELETE("/:id", func(c *gin.Context) {
-		// Extract the book ID from the URL parameter
-		bookID := c.Param("id")
-
-		client, err := persistence.ConnectToMongoDB()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to MongoDB"})
-			return
-		}
-		defer client.Disconnect(context.Background())
-
-		collection := client.Database("play_ground_go").Collection("books")
-
-		// Delete the book by its ID
-		filter := bson.M{"_id": bookID}
-		_, err = collection.DeleteOne(context.Background(), filter)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete book"})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{"message": "Book deleted successfully"})
-	})
+	tokenLock := apiGroup.Group("token/lock")
+	tokenLock.Use(middleware.JwtMiddleware())
+	tokenLock.GET("/check", handler.TokenCheckHandler)
 
 	return r
 }
