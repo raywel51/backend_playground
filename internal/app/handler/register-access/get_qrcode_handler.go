@@ -1,9 +1,10 @@
 package register_access
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
+
+	"github.com/gin-gonic/gin"
 
 	"playground/internal/app/model/response"
 	"playground/internal/app/repository"
@@ -24,7 +25,7 @@ func GetQrCode(c *gin.Context) {
 			CustomerName: qrCode.RealName + " " + qrCode.FamilyName,
 			LicensePlate: qrCode.LicensePlate,
 			PinCode:      qrCode.PinCode,
-			QRImg:        os.Getenv("HOST_URI") + "/v2/gen-qr/" + qrCode.QrKey,
+			QRImg:        os.Getenv("HOST_URI") + "/api/v1/gen-qr/" + qrCode.QrKey,
 			QRKey:        qrCode.QrKey,
 			RegisterTime: qrCode.RegisterTime.Format("2006-01-02 15:04"),
 			RoomNumber:   qrCode.RoomNumber,

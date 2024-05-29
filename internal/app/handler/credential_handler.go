@@ -1,11 +1,12 @@
 package handler
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"net/http"
-	"time"
 
 	"playground/internal/app/helper"
 	credential_helper "playground/internal/app/helper/credential-helper"
@@ -36,6 +37,7 @@ func UserLogin(c *gin.Context) {
 
 	user, err := repository.SelectOneUserByUsername(req.Username)
 	if err != nil {
+		println(user)
 		c.JSON(http.StatusBadRequest, gin.H{"status": false, "message": "Invalid credentials"})
 		return
 	}
